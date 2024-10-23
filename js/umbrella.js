@@ -18,18 +18,9 @@ gl.useProgram(program);
 
 // Draw and triangulate the handle
 function drawHandle() {
-    const handleVertices = [];
-
-    const bodyLeftLine = calculateStraightLine(
-        { x: -0.04, y: -0.5 }, { x: -0.04, y: 0.65 }, 3
-    );
 
     const upperBodyCurve = calculateBezierCurve(
         { x: -0.04, y: 0.7 }, { x: 0.0, y: 0.75 }, { x: 0.04, y: 0.7 }
-    );
-
-    const bodyRightLine = calculateStraightLine(
-        { x: 0.04, y: 0.75 }, { x: 0.04, y: -0.5 }, 3
     );
 
     const handleCurve = calculateBezierCurve(
@@ -40,7 +31,8 @@ function drawHandle() {
         {x: -0.23, y: -0.5}, { x: -0.13, y: -0.65 }, { x: -0.042, y: -0.5 }
     );
 
-    handleVertices.push(...bodyLeftLine, ...upperBodyCurve, ...bodyRightLine, ...handleCurve, ...handleInnerCurve);
+    const handleVertices = [];
+    handleVertices.push(...upperBodyCurve, ...handleCurve, ...handleInnerCurve);
 
     // Perform polygon triangulation
     const result = triangulate(handleVertices);
@@ -48,7 +40,6 @@ function drawHandle() {
         console.error(result?.errorMessage || 'Triangulation failed.');
         return;
     }
-
     const triangles = result.triangles;
 
     // Flatten the triangulated handleVertices for WebGL
@@ -61,7 +52,6 @@ function drawHandle() {
 
     // Initialize the buffer with triangle data
     const positionBuffer = initBuffer(gl, positions);
-
     // Bind the buffer to the attribute
     const aPosition = gl.getAttribLocation(program, 'a_position');
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -112,7 +102,6 @@ function drawFabric() {
         console.error(result?.errorMessage || 'Triangulation failed.');
         return;
     }
-
     const triangles = result.triangles;
 
     // Flatten the triangulated fabricVertices for WebGL
@@ -125,7 +114,6 @@ function drawFabric() {
 
     // Initialize the buffer with triangle data
     const positionBuffer2 = initBuffer(gl, positions);
-
     // Bind the buffer to the attribute
     const aPosition = gl.getAttribLocation(program, 'a_position');
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer2);
@@ -138,25 +126,13 @@ function drawFabric() {
         console.error('Failed to get the uniform location of u_color.');
         return;
     }
-    gl.uniform4f(uColor, 0.9, 0.65, 0.9, 1.0); // Dark purple color
+    gl.uniform4f(uColor, 0.9, 0.65, 0.9, 1.0); // Lilac color
 
     // Draw the triangles
     gl.drawArrays(gl.TRIANGLES, 0, positions.length / 2);
 }
 
 drawFabric();
-
-
-function calculateStraightLine(p0, p1, numPoints = 10) {
-    const vertices = [];
-    for (let i = 0; i <= numPoints; i++) {
-        const t = i / numPoints;
-        const x = p0.x + t * (p1.x - p0.x);
-        const y = p0.y + t * (p1.y - p0.y);
-        vertices.push({ x, y });
-    }
-    return vertices;
-}
 
 // Bézier Curve calculation
 function calculateBezierCurve(p0, p1, p2, numPoints = 30) {

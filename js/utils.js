@@ -7,7 +7,6 @@ function getItem(list, index) {
     return list[(index + length) % length];
 }
 
-
 function triangulate(vertices) {
     const triangles = [];
     let errorMessage = '';
@@ -23,11 +22,6 @@ function triangulate(vertices) {
         return { success: false, triangles, errorMessage };
     }
 
-    if (vertices.length > 1024) {
-        errorMessage = 'The max vertex list length is 1024.';
-        return { success: false, triangles, errorMessage };
-    }
-
     console.log("vertices length:");
     console.log(vertices.length);
 
@@ -38,11 +32,7 @@ function triangulate(vertices) {
 
     console.log('indexList: ', indexList);
 
-    const totalTriangleCount = vertices.length - 2;
-    const totalTriangleIndexCount = totalTriangleCount * 3;
-    let triangleIndexCount = 0;
-
-    // Ear-clipping algorithm to find triangles
+    // Ear clipping to find triangles
     while (indexList.length > 3) {
         let earFound = false;
 
@@ -57,34 +47,37 @@ function triangulate(vertices) {
             const vb = vertices[b];
             const vc = vertices[c];
 
-            const va_to_vb = subtractVectors(vb, va);
-            const va_to_vc = subtractVectors(vc, va);
+            const vector_va_vb = subtractVectors(vb, va);
+            const vector_va_vc = subtractVectors(vc, va);
 
-            if (crossProduct(va_to_vb, va_to_vc) < 0) {
+            if (crossProduct(vector_va_vb, vector_va_vc) < 0) {
                 console.log('Not a convex vertex, skip it');
-                continue; // Not a convex vertex, skip it
+                continue;
             }
 
             let isEar = true;
 
-            // Check if any other vertex lies inside the triangle
+            // Checking if any other point exists inside the triangle
             for (let j = 0; j < vertices.length; j++) {
                 if (j === a || j === b || j === c) continue;
 
                 const p = vertices[j];
-                console.log('is P inside triangle => ', p);
+                console.log('Is P inside the triangle => ', p);
+
                 if (isPointInTriangle(p, va, vb, vc)) {
                     isEar = false;
-                    console.log('yes it is inside triangle => ', p);
+                    console.log('Yes it is inside the triangle => ', p);
                     break;
                 }
             }
 
             if (isEar) {
-                // Add the triangle indices to the list
+                // Add the triangle points to the list
                 console.log(b, a, c, ' is triangle');
                 triangles.push(b, a, c);
-                indexList.splice(i, 1); // Remove the ear vertex
+
+                // Remove the ear vertex
+                indexList.splice(i, 1);
                 earFound = true;
                 break;
             }
@@ -123,8 +116,4 @@ function isPointInTriangle(p, a, b, c) {
 
 function subtractVectors(v1, v2) {
     return { x: v1.x - v2.x, y: v1.y - v2.y };
-}
-
-function isSimplePolygon(vertices) {
-    throw new Error('NotImplementedException');
 }
